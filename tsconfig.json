@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022", "dom"],
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "declarationMap": true,
+    "skipLibCheck": true,
+    "paths": {
+      "cv": ["./src/cv.js"],
+      "util": ["./src/util.js"],
+      "App": ["./src/App.js"],
+      "signal-effect": ["./deps/signal-effect.js"]
+    }
+  },
+  "include": [ "src/**/*" ]
+}

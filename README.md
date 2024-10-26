@@ -1,2 +1,3 @@
 # cvjs
-An ES6 remake of https://github.com/claire-west/js-lib
+
+A mimimal no-build virtual DOM framework built on [developit/htm](https://github.com/developit/htm) and [proposal-signals/signal-polyfill](https://github.com/proposal-signals/signal-polyfill).

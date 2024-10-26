@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link id="favicon" rel="icon" href="https://cv4x.net/favicon.ico" />
+    <!-- TODO: auto-generate importmap with cache-busting -->
+    <script type="importmap">
+        {
+            "imports": {
+                "cv": "./src/cv.js",
+                "util": "./src/util.js",
+                "App": "./src/App.js",
+                "htm": "./deps/htm.module.js",
+                "signal-polyfill": "./deps/signal-polyfill.js",
+                "signal-effect": "./deps/signal-effect.js"
+            }
+        }
+    </script>
+    <script type="module" async>
+        import "cv";
+        import "util";
+        import "App";
+        import "htm";
+        import "signal-polyfill";
+        import "signal-effect";
+    </script>
+    <script type="module" defer>
+        import { Computed, html, Range, render, State, virtualize, processTemplate } from "cv";
+
+        function foo({children}) {
+            return html`<span>${children[0]}</span> <span>${children[1]}</span>`;
+        }
+
+        function countTo5(counter) {
+            return Computed(() => {
+                const val = counter.get();
+                return val ? Range(0, (val % 5) || 5).map(i => html`<span>${i + 1}</span> `) : "";
+            });
+        }
+
+        function syncedInputs() {
+            const text = State("");
+            const strlen = Computed(() => text.get().length);
+            return html`<input value="${text}" oninput="${oninput}" /><input value="${text}" oninput="${oninput}" />${countTo5(strlen)}`;
+
+            function oninput(event) {
+                text.set(event.target.value);
+            }
+        }
+
+        function pStack() {
+            const text = State("");
+            return html`<>
+                <input value="${text}" oninput="${oninput}" />
+                ${Computed(() => Range(text.get().length).map(i =>
+                    html`<p>${Computed(() => text.get().substring(0, i + 1))}</p>`
+                ))}
+            </>`;
+
+            function oninput(event) {
+                text.set(event.target.value);
+            }
+        }
+
+        function inputStack() {
+            const text = State("");
+            let out = [];
+            return html`<>
+                ${Computed(() => {
+                    const val = text.get();
+                    if (out.length > val.length) {
+                        out.length = val.length;
+                    }
+                    for (let i = out.length; i < (val.length || 1); i++) {
+                        out.push(html`<input value="${text}" oninput="${oninput}" />`);
+                    }
+                    return out;
+                })}
+            </>`;
+
+            function oninput(event) {
+                text.set(event.target.value);
+            }
+        }
+
+        function test(props, counter) {
+            return html`<div>
+                <h1>Hello <${foo}>${props.name}${counter}</>!</h1>
+                <input value="${counter}" disabled />
+                ${countTo5(counter)}
+                <br/>
+                ${syncedInputs}
+            </div>`;
+        }
+
+        const counter = State(0);
+        setInterval(() => counter.set(counter.get() + 1), 1000);
+
+        const virtual = test({name:"world"}, counter);
+        const element = render(virtual);
+        window.document.querySelector("#test").append(element)
+
+        const stackContainer = window.document.querySelector("#inputstack");
+        stackContainer.append(render(inputStack()));
+
+        const pContainer = window.document.querySelector("#p-ramid");
+        pContainer.append(render(pStack()));
+
+        await virtualize(window.document.querySelector("#app"));
+    </script>
+</head>
+<body>
+    <div id="test"></div>
+    <br>
+    <div id="inputstack"></div>
+    <br>
+    <div id="p-ramid"></div>
+    <br>
+    <App module="App" id="app" prop="test"></App>
+</body>
+</html>
