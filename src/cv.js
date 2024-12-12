@@ -11,7 +11,7 @@ export {
     State,
     html,
     render,
-    virtualize, processTemplate
+    virtualize
 };
 
 /**
